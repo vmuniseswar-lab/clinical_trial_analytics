@@ -1,0 +1,19 @@
+﻿# Virtual environment
+.venv/
+
+# DuckDB database files
+*.duckdb
+*.duckdb.wal
+
+# Raw data files (too large for git)
+data/raw/
+
+# dbt
+target/
+dbt_packages/
+logs/
+
+# Python
+__pycache__/
+*.pyc
+.env

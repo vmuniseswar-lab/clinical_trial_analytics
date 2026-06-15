@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: stg_clinical_trials
+    description: "Cleaned and standardised clinical trial records — silver layer"
+    columns:
+      - name: trial_id
+        description: "Unique NCT identifier"
+        tests:
+          - unique
+          - not_null
+
+      - name: trial_status
+        description: "Standardised recruitment status"
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - 'RECRUITING'
+                - 'COMPLETED'
+                - 'TERMINATED'
+                - 'WITHDRAWN'
+                - 'ACTIVE_NOT_RECRUITING'
+                - 'NOT_YET_RECRUITING'
+                - 'SUSPENDED'
+                - 'UNKNOWN'
+
+      - name: enrollment_target
+        description: "Target or actual enrollment count"
+
+      - name: start_date
+        description: "Trial start date"
+        tests:
+          - not_null

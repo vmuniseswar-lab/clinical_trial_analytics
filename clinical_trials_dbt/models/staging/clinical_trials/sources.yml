@@ -1,0 +1,29 @@
+version: 2
+
+sources:
+  - name: clinical_trials_raw
+    description: "Raw clinical trials data from ClinicalTrials.gov bronze layer"
+    tables:
+      - name: trials_raw
+        description: "Flat CSV of clinical trial records ingested from API"
+        columns:
+          - name: trial_id
+            description: "Unique NCT identifier for each trial"
+          - name: trial_title
+            description: "Brief title of the trial"
+          - name: overall_status
+            description: "Current recruitment status"
+          - name: phase
+            description: "Trial phase e.g. PHASE2, PHASE3"
+          - name: enrollment_count
+            description: "Target or actual enrollment number"
+          - name: start_date
+            description: "Trial start date"
+          - name: completion_date
+            description: "Trial completion date"
+          - name: sponsor_name
+            description: "Lead sponsor organisation"
+          - name: condition
+            description: "Medical condition being studied"
+          - name: study_type
+            description: "Interventional or observational"

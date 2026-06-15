@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: dim_therapeutic_area
+    description: "Therapeutic area dimension — one row per unique condition"
+    columns:
+      - name: therapeutic_area_id
+        tests:
+          - unique
+          - not_null
+      - name: therapeutic_area_name
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_sponsor
+    description: "Sponsor dimension — one row per unique sponsor"
+    columns:
+      - name: sponsor_id
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_trial
+    description: "Trial dimension — descriptive attributes per trial"
+    columns:
+      - name: trial_id
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_enrollment
+    description: "Enrollment fact table — metrics per trial"
+    columns:
+      - name: trial_id
+        tests:
+          - unique
+          - not_null
+      - name: enrollment_target
+        tests:
+          - not_null

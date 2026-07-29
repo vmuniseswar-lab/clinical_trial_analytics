@@ -1,29 +1,29 @@
-arkdown
 # Clinical Trial Analytics Platform
 
-An end-to-end data pipeline built using **Python**, **dbt Core**, **DuckDB**, and a **medallion architecture** (Bronze → Silver → Gold), consuming real clinical trial data from the ClinicalTrials.gov v2 API.
+An end-to-end data pipeline built using **Python**, **dbt Core**, **BigQuery**, and a **medallion architecture** (Bronze → Silver → Gold), consuming real clinical trial data from the ClinicalTrials.gov v2 API.
 
 ## Architecture
 
+```
 ClinicalTrials.gov API
-│
-▼
-Python Ingestion (fetch_trials.py)
-│ requests · pandas
-▼
-Bronze Layer (raw JSON / CSV)
-│
-▼
-Silver Layer — dbt staging models
-(cleaning, type casting, field standardisation)
-│
-▼
-Gold Layer — dbt mart models
-(dimensional model: fact + dimension tables)
-│
-▼
-Parquet export → Power BI
-
+        │
+        ▼
+  Python Ingestion (fetch_trials.py)
+        │  requests · pandas
+        ▼
+  Bronze Layer (raw JSON / CSV)
+        │
+        ▼
+  Silver Layer — dbt staging models
+  (cleaning, type casting, field standardisation)
+        │
+        ▼
+  Gold Layer — dbt mart models
+  (dimensional model: fact + dimension tables)
+        │
+        ▼
+  Parquet export → Power BI
+```
 
 ## Tech Stack
 
@@ -31,51 +31,69 @@ Parquet export → Power BI
 |---|---|
 | Ingestion | Python (requests, pandas) |
 | Transformation | dbt Core |
-| Warehouse | DuckDB |
+| Warehouse | Google BigQuery |
 | Orchestration | Apache Airflow (local) |
 | Serving | Parquet → Power BI |
 
 ## Project Structure
 
+```
 clinical_trial_analytics/
-├── ingestion/clinical_trials/
-│ ├── fetch_trials.py # Pulls data from ClinicalTrials.gov v2 API
-│ └── export_parquet.py # Exports Gold layer to Parquet for Power BI
+├── ingestion/
+│   └── clinical_trials/
+│       ├── fetch_trials.py
+│       └── export_parquet.py
 ├── clinical_trials_dbt/
-│ ├── models/
-│ │ ├── staging/ # Silver layer: clean, typed source data
-│ │ └── marts/ # Gold layer: dimensional model
-│ │ ├── dim_sponsor.sql
-│ │ ├── dim_therapeutic_area.sql
-│ │ ├── dim_trial.sql
-│ │ └── fct_enrollment.sql
-│ └── dbt_project.yml
-└── data/gold/ # Parquet outputs (dim + fact tables)
-
+│   ├── macros/
+│   │   ├── clean_string.sql
+│   │   └── safe_divide.sql
+│   ├── models/
+│   │   ├── staging/
+│   │   │   └── clinical_trials/
+│   │   └── marts/
+│   │       └── clinical_trials/
+│   │           ├── dim_sponsor.sql
+│   │           ├── dim_therapeutic_area.sql
+│   │           ├── dim_trial.sql
+│   │           └── fct_enrollment.sql
+│   └── dbt_project.yml
+├── tests/
+│   └── assert_enrollment_target_positive.sql
+└── data/
+    └── gold/
+```
 
 ## dbt Models
 
 ### Staging
-- `staging_clinical_trials` — standardises raw API data: type casting, field renaming, null handling
+- `staging_clinical_trials` — standardises raw API data: type casting, field renaming, null handling, phase normalisation
 
 ### Marts (Gold Layer)
-| Model | Description |
+| Model | Materialisation | Description |
+|---|---|---|
+| `dim_trial` | table | Core trial attributes (status, phase, start/end dates) |
+| `dim_sponsor` | table | Lead sponsor details |
+| `dim_therapeutic_area` | table | Condition/disease area classification |
+| `fct_enrollment` | incremental | Enrollment targets and actuals per trial |
+
+### Macros
+| Macro | Description |
 |---|---|
-| `dim_trial` | Core trial attributes (status, phase, start/end dates) |
-| `dim_sponsor` | Lead sponsor details |
-| `dim_therapeutic_area` | Condition/disease area classification |
-| `fct_enrollment` | Enrollment targets per trial |
+| `clean_string(column)` | Trims whitespace and returns null for empty strings |
+| `safe_divide(numerator, denominator)` | Divides safely, returning null on zero denominator |
 
 ### Data Quality Tests
-Schema tests are defined across all models:
-- `not_null` on all primary keys and critical fields
-- `unique` on all surrogate keys
+- **Schema tests** — `not_null` and `unique` on all primary keys across all models (12 tests)
+- **Custom singular test** — `assert_enrollment_target_positive` ensures no negative enrollment targets
+- **Source freshness** — warns after 7 days, errors after 14 days of no new data
 
 ## Key Design Decisions
 
-- **DuckDB** used as a lightweight local warehouse — no infrastructure required, runs fully in-process
-- **Parquet export** added to resolve a DuckDB/Power BI concurrency constraint, enabling reliable self-service BI access
-- **Medallion architecture** enforces clear separation between raw ingestion, cleaning, and analytics-ready outputs
+- **Incremental model** — `fct_enrollment` uses `merge` strategy on `trial_id`, processing only new records on each run rather than full refresh
+- **Reusable macros** — `safe_divide` and `clean_string` encapsulate repeated logic, keeping models clean and consistent
+- **Qualify deduplication** — `QUALIFY ROW_NUMBER()` used in `fct_enrollment` to handle trials mapping to multiple therapeutic areas
+- **Parquet export** — Gold tables exported to Parquet to enable reliable Power BI connectivity
+- **Source freshness monitoring** — dbt freshness checks alert when source data goes stale
 
 ## Running the Project
 
@@ -86,13 +104,20 @@ pip install -r requirements.txt
 # 2. Fetch data from ClinicalTrials.gov API
 python ingestion/clinical_trials/fetch_trials.py
 
-# 3. Run dbt transformations
+# 3. Run dbt — builds all models and runs all tests
 cd clinical_trials_dbt
-dbt run
-dbt test
+dbt build
 
 # 4. Export Gold layer to Parquet
 python ingestion/clinical_trials/export_parquet.py
+```
+
+## Test Results
+
+```
+Done. PASS=17 WARN=0 ERROR=0 SKIP=0 TOTAL=17
+1 incremental model, 3 table models, 1 view model
+12 schema tests + 1 custom singular test
 ```
 
 ## Data Source

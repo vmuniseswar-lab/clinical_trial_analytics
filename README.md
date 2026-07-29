@@ -39,24 +39,28 @@ ClinicalTrials.gov API
 
 ```
 clinical_trial_analytics/
-├── ingestion/clinical_trials/
-│   ├── fetch_trials.py        # Pulls data from ClinicalTrials.gov v2 API
-│   └── export_parquet.py      # Exports Gold layer to Parquet for Power BI
+├── ingestion/
+│   └── clinical_trials/
+│       ├── fetch_trials.py
+│       └── export_parquet.py
 ├── clinical_trials_dbt/
 │   ├── macros/
-│   │   ├── clean_string.sql   # Reusable macro for null-safe string cleaning
-│   │   └── safe_divide.sql    # Reusable macro for safe percentage calculation
+│   │   ├── clean_string.sql
+│   │   └── safe_divide.sql
 │   ├── models/
-│   │   ├── staging/           # Silver layer: clean, typed source data
-│   │   └── marts/             # Gold layer: dimensional model
-│   │       ├── dim_sponsor.sql
-│   │       ├── dim_therapeutic_area.sql
-│   │       ├── dim_trial.sql
-│   │       └── fct_enrollment.sql   # Incremental model (merge strategy)
+│   │   ├── staging/
+│   │   │   └── clinical_trials/
+│   │   └── marts/
+│   │       └── clinical_trials/
+│   │           ├── dim_sponsor.sql
+│   │           ├── dim_therapeutic_area.sql
+│   │           ├── dim_trial.sql
+│   │           └── fct_enrollment.sql
 │   └── dbt_project.yml
 ├── tests/
-│   └── assert_enrollment_target_positive.sql  # Custom singular test
-└── data/gold/                 # Parquet outputs (dim + fact tables)
+│   └── assert_enrollment_target_positive.sql
+└── data/
+    └── gold/
 ```
 
 ## dbt Models

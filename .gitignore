@@ -18,3 +18,8 @@ __pycache__/
 *.pyc
 .env
 secrets/ 
+target/ 
+dbt_packages/ 
+dev.duckdb 
+data/raw/ 
+airflow_home/ 

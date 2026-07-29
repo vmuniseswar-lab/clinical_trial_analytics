@@ -12,6 +12,6 @@ with source as (
 )
 
 select
-    row_number() over (order by sponsor_name)   as sponsor_id,
+    {{ dbt_utils.generate_surrogate_key(['sponsor_name']) }}    as sponsor_id,
     sponsor_name
 from source

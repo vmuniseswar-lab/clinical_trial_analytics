@@ -12,6 +12,6 @@ with source as (
 )
 
 select
-    row_number() over (order by primary_condition)  as therapeutic_area_id,
-    primary_condition                               as therapeutic_area_name
+    {{ dbt_utils.generate_surrogate_key(['primary_condition']) }} as therapeutic_area_id,
+    primary_condition as therapeutic_area_name
 from source

@@ -5,8 +5,8 @@
 {{
     config(
         materialized='incremental',
-        unique_key='trial_id',
-        incremental_strategy='delete+insert'
+        unique_key ='trial_id',
+        incremental_strategy='merge'
     )
 }}
 
@@ -52,21 +52,6 @@ final as (
             else 0
         end                                         as enrollment_actual,
 
-        -- Derived enrollment metrics
-        {# case
-            when t.enrollment_target > 0
-                then round(
-                    case
-                        when t.trial_status = 'COMPLETED'
-                            then t.enrollment_target
-                        when t.trial_status = 'RECRUITING'
-                            then round(t.enrollment_target * 0.6, 0)
-                        else 0
-                    end * 100.0 / t.enrollment_target, 1)
-            else null
-        end                                         as enrollment_rate_pct, #}
-        {{ safe_divide('enrollment_actual', 't.enrollment_target') }} as enrollment_rate_pct,
-
         -- Dates for time intelligence in Power BI
         t.start_date,
         t.completion_date,
@@ -80,10 +65,23 @@ final as (
 
     left join dim_sp sp
         on t.sponsor_name = sp.sponsor_name
-         where t.enrollment_target is not null   
-{% if is_incremental() %}
-  and t.start_date >= (select max(start_date) from {{ this }})
-{% endif %}
+
+    where t.enrollment_target is not null
+
+    {% if is_incremental() %}
+      and t.start_date >= (select max(start_date) from {{ this }})
+    {% endif %}
+    
+    qualify row_number() over (partition by t.trial_id order by ta.therapeutic_area_id) = 1
+),
+
+with_rates as (
+
+    select
+        *,
+        {{ safe_divide('enrollment_actual', 'enrollment_target') }} as enrollment_rate_pct
+    from final
+
 )
 
-select * from final
+select * from with_rates

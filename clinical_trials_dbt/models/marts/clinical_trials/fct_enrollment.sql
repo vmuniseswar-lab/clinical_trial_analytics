@@ -2,6 +2,14 @@
 -- One row per trial with enrollment metrics
 -- Joins to all dimension tables
 
+{{
+    config(
+        materialized='incremental',
+        unique_key='trial_id',
+        incremental_strategy='delete+insert'
+    )
+}}
+
 with trials as (
 
     select * from {{ ref('staging_clinical_trials') }}
@@ -45,7 +53,7 @@ final as (
         end                                         as enrollment_actual,
 
         -- Derived enrollment metrics
-        case
+        {# case
             when t.enrollment_target > 0
                 then round(
                     case
@@ -56,7 +64,8 @@ final as (
                         else 0
                     end * 100.0 / t.enrollment_target, 1)
             else null
-        end                                         as enrollment_rate_pct,
+        end                                         as enrollment_rate_pct, #}
+        {{ safe_divide('enrollment_actual', 't.enrollment_target') }} as enrollment_rate_pct,
 
         -- Dates for time intelligence in Power BI
         t.start_date,
@@ -72,7 +81,9 @@ final as (
     left join dim_sp sp
         on t.sponsor_name = sp.sponsor_name
          where t.enrollment_target is not null   
-
+{% if is_incremental() %}
+  and t.start_date >= (select max(start_date) from {{ this }})
+{% endif %}
 )
 
 select * from final

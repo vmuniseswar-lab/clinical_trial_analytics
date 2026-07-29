@@ -95,7 +95,7 @@ print("\nDone. Bronze layer complete.")
 print("\nLoading into BigQuery...")
 
 credentials = service_account.Credentials.from_service_account_file(
-    "D:/clinical_trial_analytics/secrets/autonomous-rite-503820-t8-a0b9fa30e604.json"
+    os.path.join(os.path.dirname(__file__), "../../secrets/autonomous-rite-503820-t8-96919f82b0da.json")
 )
 client = bigquery.Client(project="autonomous-rite-503820-t8", credentials=credentials)
 table_id = "autonomous-rite-503820-t8.clinical_trial_analytics.raw_clinical_trials"

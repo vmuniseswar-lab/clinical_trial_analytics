@@ -3,8 +3,9 @@ version: 2
 sources:
   - name: clinical_trials_raw
     description: "Raw clinical trials data from ClinicalTrials.gov bronze layer"
+    schema: clinical_trial_analytics
     tables:
-      - name: trials_raw
+      - name: raw_clinical_trials
         description: "Flat CSV of clinical trial records ingested from API"
         columns:
           - name: trial_id

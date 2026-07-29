@@ -2,6 +2,8 @@ import requests
 import pandas as pd
 import json
 import os
+from google.cloud import bigquery
+from google.oauth2 import service_account
 from datetime import datetime
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -88,3 +90,17 @@ print(df['overall_status'].value_counts().to_string())
 print(f"\nPhase breakdown:")
 print(df['phase'].value_counts().to_string())
 print("\nDone. Bronze layer complete.")
+
+# ── Load into BigQuery Bronze table ───────────────────────────────────────────
+print("\nLoading into BigQuery...")
+
+credentials = service_account.Credentials.from_service_account_file(
+    "D:/clinical_trial_analytics/secrets/autonomous-rite-503820-t8-a0b9fa30e604.json"
+)
+client = bigquery.Client(project="autonomous-rite-503820-t8", credentials=credentials)
+table_id = "autonomous-rite-503820-t8.clinical_trial_analytics.raw_clinical_trials"
+
+df["extracted_at"] = datetime.now().isoformat()
+job = client.load_table_from_dataframe(df, table_id)
+job.result()
+print(f"Loaded {len(df)} rows into {table_id}")

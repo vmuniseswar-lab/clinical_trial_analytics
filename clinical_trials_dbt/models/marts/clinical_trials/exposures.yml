@@ -1,0 +1,21 @@
+version: 2
+
+exposures:
+  - name: clinical_trials_power_bi_dashboard
+    type: dashboard
+    maturity: medium
+    url: https://app.powerbi.com
+    description: >
+      Power BI dashboard consuming Gold layer clinical trial data.
+      Provides self-service reporting on trial enrollment, sponsor activity,
+      and therapeutic area trends for analytical teams.
+
+    depends_on:
+      - ref('fct_enrollment')
+      - ref('dim_trial')
+      - ref('dim_sponsor')
+      - ref('dim_therapeutic_area')
+
+    owner:
+      name: Muniseswar Venkatesh
+      email: v.muniseswar@gmail.com

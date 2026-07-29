@@ -123,3 +123,29 @@ Done. PASS=17 WARN=0 ERROR=0 SKIP=0 TOTAL=17
 ## Data Source
 
 [ClinicalTrials.gov v2 API](https://clinicaltrials.gov/data-api/api) — publicly available registry of clinical studies.
+
+## AI Query Agent
+
+A natural language query agent that allows users to ask questions about clinical trial data in plain English.
+
+Built with the Anthropic Claude API — the agent generates BigQuery SQL from a natural language question, runs it against the Gold layer, and returns a plain English summary.
+
+### Example Questions
+
+- *"Which therapeutic area has the highest average enrollment target?"*
+- *"How many trials are currently recruiting?"*
+- *"Which sponsor has the most completed trials?"*
+
+### Running the Agent
+
+```bash
+python ai_agent/query_agent.py
+```
+
+### Example Output
+
+```
+Question: Which sponsor has the most completed trials?
+Answer: National Cancer Institute (NCI) leads all sponsors with the most 
+completed clinical trials, having successfully completed 6 trials.
+```

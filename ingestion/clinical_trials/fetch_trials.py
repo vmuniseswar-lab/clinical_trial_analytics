@@ -104,3 +104,6 @@ df["extracted_at"] = datetime.now().isoformat()
 job = client.load_table_from_dataframe(df, table_id)
 job.result()
 print(f"Loaded {len(df)} rows into {table_id}")
+
+#Add a comment to indicate that the script has completed successfully
+print("Script completed successfully.")

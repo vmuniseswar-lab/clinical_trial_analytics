@@ -1,29 +1,29 @@
-markdown
 # Clinical Trial Analytics Platform
 
 An end-to-end data pipeline built using **Python**, **dbt Core**, **BigQuery**, and a **medallion architecture** (Bronze → Silver → Gold), consuming real clinical trial data from the ClinicalTrials.gov v2 API.
 
 ## Architecture
 
+```
 ClinicalTrials.gov API
-│
-▼
-Python Ingestion (fetch_trials.py)
-│ requests · pandas
-▼
-Bronze Layer (raw JSON / CSV)
-│
-▼
-Silver Layer — dbt staging models
-(cleaning, type casting, field standardisation)
-│
-▼
-Gold Layer — dbt mart models
-(dimensional model: fact + dimension tables)
-│
-▼
-Parquet export → Power BI
-
+        │
+        ▼
+  Python Ingestion (fetch_trials.py)
+        │  requests · pandas
+        ▼
+  Bronze Layer (raw JSON / CSV)
+        │
+        ▼
+  Silver Layer — dbt staging models
+  (cleaning, type casting, field standardisation)
+        │
+        ▼
+  Gold Layer — dbt mart models
+  (dimensional model: fact + dimension tables)
+        │
+        ▼
+  Parquet export → Power BI
+```
 
 ## Tech Stack
 
@@ -37,26 +37,27 @@ Parquet export → Power BI
 
 ## Project Structure
 
+```
 clinical_trial_analytics/
 ├── ingestion/clinical_trials/
-│ ├── fetch_trials.py # Pulls data from ClinicalTrials.gov v2 API
-│ └── export_parquet.py # Exports Gold layer to Parquet for Power BI
+│   ├── fetch_trials.py        # Pulls data from ClinicalTrials.gov v2 API
+│   └── export_parquet.py      # Exports Gold layer to Parquet for Power BI
 ├── clinical_trials_dbt/
-│ ├── macros/
-│ │ ├── clean_string.sql # Reusable macro for null-safe string cleaning
-│ │ └── safe_divide.sql # Reusable macro for safe percentage calculation
-│ ├── models/
-│ │ ├── staging/ # Silver layer: clean, typed source data
-│ │ └── marts/ # Gold layer: dimensional model
-│ │ ├── dim_sponsor.sql
-│ │ ├── dim_therapeutic_area.sql
-│ │ ├── dim_trial.sql
-│ │ └── fct_enrollment.sql # Incremental model (merge strategy)
-│ └── dbt_project.yml
+│   ├── macros/
+│   │   ├── clean_string.sql   # Reusable macro for null-safe string cleaning
+│   │   └── safe_divide.sql    # Reusable macro for safe percentage calculation
+│   ├── models/
+│   │   ├── staging/           # Silver layer: clean, typed source data
+│   │   └── marts/             # Gold layer: dimensional model
+│   │       ├── dim_sponsor.sql
+│   │       ├── dim_therapeutic_area.sql
+│   │       ├── dim_trial.sql
+│   │       └── fct_enrollment.sql   # Incremental model (merge strategy)
+│   └── dbt_project.yml
 ├── tests/
-│ └── assert_enrollment_target_positive.sql # Custom singular test
-└── data/gold/ # Parquet outputs (dim + fact tables)
-
+│   └── assert_enrollment_target_positive.sql  # Custom singular test
+└── data/gold/                 # Parquet outputs (dim + fact tables)
+```
 
 ## dbt Models
 
@@ -109,10 +110,11 @@ python ingestion/clinical_trials/export_parquet.py
 
 ## Test Results
 
+```
 Done. PASS=17 WARN=0 ERROR=0 SKIP=0 TOTAL=17
 1 incremental model, 3 table models, 1 view model
 12 schema tests + 1 custom singular test
-
+```
 
 ## Data Source
 

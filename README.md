@@ -25,6 +25,10 @@ ClinicalTrials.gov API
   Parquet export → Power BI
 ```
 
+## Lineage Graph
+
+![dbt Lineage Graph](docs/lineage_graph.png)
+
 ## Tech Stack
 
 | Layer | Tool |
@@ -138,14 +142,25 @@ Built with the Anthropic Claude API — the agent generates BigQuery SQL from a 
 
 ### Running the Agent
 
+**Command line:**
 ```bash
 python ai_agent/query_agent.py
 ```
+
+**Web interface (Streamlit):**
+```bash
+streamlit run ai_agent/app.py
+```
+
+### Demo
+
+![AI Agent Demo](docs/ai_agent_demo.png)
 
 ### Example Output
 
 ```
 Question: Which sponsor has the most completed trials?
-Answer: National Cancer Institute (NCI) leads all sponsors with the most 
-completed clinical trials, having successfully completed 6 trials.
+Answer: Astrageneca leads all sponsors with the most 
+completed clinical trials, having successfully completed 4 trials.
 ```
+

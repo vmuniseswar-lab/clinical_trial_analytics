@@ -1,36 +1,37 @@
-version: 2
+  version: 2
 
-sources:
-  - name: clinical_trials_raw
-    description: "Raw clinical trials data from ClinicalTrials.gov bronze layer"
-    schema: clinical_trial_analytics
-    freshness:
-      warn_after: {count: 7, period: day}
-      error_after: {count: 14, period: day}
-    loaded_at_field: start_date
-    tables:
-      - name: raw_clinical_trials
-        description: "Flat CSV of clinical trial records ingested from API"
-        columns:
-          - name: trial_id
-            description: "Unique NCT identifier for each trial"
-          - name: trial_title
-            description: "Brief title of the trial"
-          - name: overall_status
-            description: "Current recruitment status"
-          - name: phase
-            description: "Trial phase e.g. PHASE2, PHASE3"
-          - name: enrollment_count
-            description: "Target or actual enrollment number"
-          - name: start_date
-            description: "Trial start date"
-          - name: completion_date
-            description: "Trial completion date"
-          - name: sponsor_name
-            description: "Lead sponsor organisation"
-          - name: condition
-            description: "Medical condition being studied"
-          - name: study_type
-            description: "Interventional or observational"
-          - name: enrollment_type
-            description: "Whether enrollment count is actual or estimated"
+  sources:
+    - name: clinical_trials_raw
+      description: "Raw clinical trials data from ClinicalTrials.gov bronze layer"
+      schema: clinical_trial_analytics
+      config:
+        freshness:
+          warn_after: {count: 7, period: day}
+          error_after: {count: 14, period: day}
+          loaded_at_field: start_date
+      tables:
+        - name: raw_clinical_trials
+          description: "Flat CSV of clinical trial records ingested from API"
+          columns:
+            - name: trial_id
+              description: "Unique NCT identifier for each trial"
+            - name: trial_title
+              description: "Brief title of the trial"
+            - name: overall_status
+              description: "Current recruitment status"
+            - name: phase
+              description: "Trial phase e.g. PHASE2, PHASE3"
+            - name: enrollment_count
+              description: "Target or actual enrollment number"
+            - name: start_date
+              description: "Trial start date"
+            - name: completion_date
+              description: "Trial completion date"
+            - name: sponsor_name
+              description: "Lead sponsor organisation"
+            - name: condition
+              description: "Medical condition being studied"
+            - name: study_type
+              description: "Interventional or observational"
+            - name: enrollment_type
+              description: "Whether enrollment count is actual or estimated"

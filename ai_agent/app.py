@@ -1,6 +1,8 @@
 import os
 import anthropic
 import streamlit as st
+import json
+from google.oauth2 import service_account
 from google.cloud import bigquery
 from google.oauth2 import service_account
 from dotenv import load_dotenv
@@ -19,19 +21,20 @@ st.set_page_config(
 # BigQuery setup
 @st.cache_resource
 def get_bq_client():
-    credentials = service_account.Credentials.from_service_account_file(
-        r"D:\clinical_trial_analytics\secrets\autonomous-rite-503820-t8-a0b9fa30e604.json"
-    )
+    # credentials = service_account.Credentials.from_service_account_file(
+    #     r"D:\clinical_trial_analytics\secrets\autonomous-rite-503820-t8-a0b9fa30e604.json"
+    credentials_dict = json.loads(st.secrets["gcp_service_account"])
+    credentials = service_account.Credentials.from_service_account_info(credentials_dict)
     return bigquery.Client(credentials=credentials, project="autonomous-rite-503820-t8")
 
 # Anthropic setup
 @st.cache_resource
 def get_anthropic_client():
-    return anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    return anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
 
 @st.cache_resource
 def get_elevenlabs_client():
-    return ElevenLabs(api_key=os.getenv("ELEVENLABS_API_KEY"))
+    return ElevenLabs(api_key=st.secrets["ELEVENLABS_API_KEY"])
 
 SCHEMA_CONTEXT = """
 You are a data analyst assistant. You have access to a BigQuery dataset called 

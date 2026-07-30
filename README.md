@@ -1,5 +1,7 @@
 # Clinical Trial Analytics Platform
 
+**[Live Demo](https://vmuniseswar-lab-clinical-trial-analytics-ai-agentapp-kea4lt.streamlit.app/)**
+
 An end-to-end data pipeline built using **Python**, **dbt Core**, **BigQuery**, and a **medallion architecture** (Bronze → Silver → Gold), consuming real clinical trial data from the ClinicalTrials.gov v2 API.
 
 ## Architecture

@@ -38,6 +38,7 @@ ClinicalTrials.gov API
 | Warehouse | Google BigQuery |
 | Orchestration | Apache Airflow (local) |
 | Serving | Parquet → Power BI |
+| Text-to-Speech | ElevenLabs API |
 
 ## Project Structure
 
@@ -134,6 +135,10 @@ A natural language query agent that allows users to ask questions about clinical
 
 Built with the Anthropic Claude API — the agent generates BigQuery SQL from a natural language question, runs it against the Gold layer, and returns a plain English summary.
 
+### Voice Responses (ElevenLabs)
+
+The assistant can read its answers aloud using the ElevenLabs Text-to-Speech API. After generating a plain English summary, clicking "Read Answer Aloud" converts the response to speech using the `eleven_multilingual_v2` model and plays it back directly in the app.
+
 ### Example Questions
 
 - *"Which therapeutic area has the highest average enrollment target?"*
@@ -151,6 +156,17 @@ python ai_agent/query_agent.py
 ```bash
 streamlit run ai_agent/app.py
 ```
+
+### Environment Variables
+
+Create a `.env` file with:
+
+```
+ANTHROPIC_API_KEY=your_key_here
+ELEVENLABS_API_KEY=your_key_here
+```
+
+You'll also need a Google Cloud service account JSON key for BigQuery access (see `get_bq_client()` in `app.py` for the expected path).
 
 ### Demo
 

@@ -4,6 +4,7 @@ import streamlit as st
 from google.cloud import bigquery
 from google.oauth2 import service_account
 from dotenv import load_dotenv
+from elevenlabs.client import ElevenLabs
 
 # Load environment variables
 load_dotenv()
@@ -27,6 +28,10 @@ def get_bq_client():
 @st.cache_resource
 def get_anthropic_client():
     return anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+@st.cache_resource
+def get_elevenlabs_client():
+    return ElevenLabs(api_key=os.getenv("ELEVENLABS_API_KEY"))
 
 SCHEMA_CONTEXT = """
 You are a data analyst assistant. You have access to a BigQuery dataset called 
@@ -99,6 +104,16 @@ Summarise the results in 2-3 plain English sentences that directly answer the qu
     )
     return message.content[0].text.strip()
 
+def text_to_speech(text: str) -> bytes:
+    client = get_elevenlabs_client()
+    audio = client.text_to_speech.convert(
+        voice_id="JBFqnCBsd6RMkjVDRZzb",
+        text=text,
+        model_id="eleven_multilingual_v2",
+        output_format="mp3_44100_128",
+    )
+    return b"".join(audio)
+
 # UI
 st.title("🔬 Clinical Trial Data Assistant")
 st.markdown("Ask any question about clinical trial data in plain English.")
@@ -127,20 +142,33 @@ if st.button("Ask", type="primary") and question:
     with st.spinner("Generating SQL..."):
         sql = generate_sql(question)
 
-    st.subheader("Generated SQL")
-    st.code(sql, language="sql")
-
     with st.spinner("Running query..."):
         try:
             results = run_query(sql)
-            st.subheader("Raw Results")
-            st.dataframe(results)
 
             with st.spinner("Summarising..."):
                 summary = summarise_results(question, sql, results)
 
-            st.subheader("Answer")
-            st.success(summary)
+            # Store everything so it survives reruns (e.g. clicking the audio button)
+            st.session_state.last_sql = sql
+            st.session_state.last_results = results
+            st.session_state.last_summary = summary
 
         except Exception as e:
             st.error(f"Query failed: {e}")
+
+# Display block - reads from session_state so it persists across reruns
+if "last_summary" in st.session_state:
+    st.subheader("Generated SQL")
+    st.code(st.session_state.last_sql, language="sql")
+
+    st.subheader("Raw Results")
+    st.dataframe(st.session_state.last_results)
+
+    st.subheader("Answer")
+    st.success(st.session_state.last_summary)
+
+    if st.button("🔊 Read answer aloud"):
+        with st.spinner("Generating audio..."):
+            audio_bytes = text_to_speech(st.session_state.last_summary)
+        st.audio(audio_bytes, format="audio/mp3")
